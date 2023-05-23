@@ -1,4 +1,4 @@
-TFG: Citizen Science Projects Recommendation System Based On The Spanish Elementary School Curriculum
+**TFG: Citizen Science Projects Recommendation System Based On The Spanish Elementary School Curriculum**
 
 La participación ciudadana en la CC está emergiendo como apoyo a la ciencia
 formal. La comunicación y promoción de los proyectos de CC se hace por medio de
