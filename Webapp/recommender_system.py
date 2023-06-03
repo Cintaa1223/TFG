@@ -82,19 +82,20 @@ def show_characteristics_page():
     filteredCS = projectsCS.copy()
     platform = st.multiselect(':globe_with_meridians: Plataforma', ['Observatorio de la Ciencia Ciudadana en España', 'Oficina de la Ciència Ciutadana'],['Observatorio de la Ciencia Ciudadana en España', 'Oficina de la Ciència Ciutadana'])
     
-    # To check all unique project scopes
-    scopes = []
-    projectsCS.apply(lambda row: separate_scopes(row['Project Scope'], scopes), axis=1)
-    scopes.remove('nan')
-    
-    test = []
-    scope = st.multiselect(':books: Ámbitos', scopes, scopes)
-    
     if len(platform) != 0:
         if len(platform) == 1:
             filteredCS = projectsCS[projectsCS['Citizen Science Web Name'] == platform[0]]
         else:
             filteredCS = pd.concat([projectsCS[projectsCS['Citizen Science Web Name'] == platform[0]], projectsCS[projectsCS['Citizen Science Web Name'] == platform[1]]])
+    else:
+        st.write('Debes escoger al menos una opción.')
+
+    # To check all unique project scopes
+    scopes = []
+    filteredCS.apply(lambda row: separate_scopes(row['Project Scope'], scopes), axis=1)
+    scopes.remove('nan')
+    
+    scope = st.multiselect(':books: Ámbitos', scopes, scopes)
 
     scopesdf = []
     filteredCS['Scope2'] = filteredCS['Project Scope']
@@ -107,6 +108,8 @@ def show_characteristics_page():
         filteredCS = pd.concat(scopesdf)
         filteredCS = filteredCS.drop(['Scope2'], axis=1)
         st.dataframe(filteredCS.sort_index())
+    else:
+        st.write('Debes escoger al menos una opción.')
 
     KC = ''
     KC1 = "Desarrollar una actitud responsable a partir de la toma de conciencia de la degradación del medio ambiente basada en el conocimiento de las causas que la provocan, agravan o mejoran, desde una visión sistémica, tanto local como global."
@@ -126,7 +129,7 @@ def show_characteristics_page():
     if len(platform) != 0 and len(scope) != 0:
         pred = st.selectbox("### En qué quieres basarte para encontrar proyectos similares?", ("Competencias Clave", "Otras"))
         if pred == "Otras":
-            KC = st.text_input('Introduce las palabras clave para buscar proyectos similares:')
+            KC = st.text_input("Introduce las palabras clave para buscar proyectos similares (por ejemplo: 'animales salvajes'):")
         else:
             selectedKC = st.selectbox("Escoge una competencia clave:", (listKC))
             selectedKC = listKC.index(selectedKC)
