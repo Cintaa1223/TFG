@@ -10,6 +10,7 @@ import re #Library used to remove certain symbols / characters from a text
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from wordcloud import WordCloud
+from pathlib import Path
 
 
 def load_data(filename):
@@ -17,7 +18,7 @@ def load_data(filename):
     data = data.drop_duplicates(subset=['Project Name'], keep = 'first')
     return data
 
-projectsCS = load_data("CS_Projects.csv")
+projectsCS = load_data(Path(__file__).parents[0]/"CS_Projects.csv")
 
 def barcelona_proj(web):
     if str(web) == 'Ciencia Ciudadana Ayuntamiento de Barcelona':
