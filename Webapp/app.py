@@ -5,7 +5,8 @@ import base64
 from pathlib import Path
 
 
-image = Path(__file__).parents[0]/'UPF.png'
+Path(__file__) = Path(__file__).parents[0]/
+image = 'UPF.png'
 st.write("WEBAPP by CINTA ARNAU ARASA")
 st.sidebar.image(image, caption=None, width=None, use_column_width=None, clamp=False, channels='RGB', output_format='auto')
 page = st.sidebar.selectbox("Escoge una sección a visitar:", ("Proyectos de Ciencia Ciudadana", "Competencias Clave"))
