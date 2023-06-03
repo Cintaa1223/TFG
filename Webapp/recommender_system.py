@@ -18,7 +18,7 @@ def load_data(filename):
     data = data.drop_duplicates(subset=['Project Name'], keep = 'first')
     return data
 
-projectsCS = load_data(Path(__file__).parents[1]/'VS_Projects.csv')
+projectsCS = load_data(Path(__file__).parents[0]/'VS_Projects.csv')
 
 def barcelona_proj(web):
     if str(web) == 'Ciencia Ciudadana Ayuntamiento de Barcelona':
