@@ -2,9 +2,10 @@ import streamlit as st
 from recommender_system import show_characteristics_page
 from key_competences import show_key_competences
 import base64
+from pathlib import Path
 
 
-image = 'UPF.png'
+image = Path(__file__).parents[0]/'UPF.png'
 st.write("WEBAPP by CINTA ARNAU ARASA")
 st.sidebar.image(image, caption=None, width=None, use_column_width=None, clamp=False, channels='RGB', output_format='auto')
 page = st.sidebar.selectbox("Escoge una sección a visitar:", ("Proyectos de Ciencia Ciudadana", "Competencias Clave"))
