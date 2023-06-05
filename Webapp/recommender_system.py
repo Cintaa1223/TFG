@@ -16,6 +16,7 @@ from pathlib import Path
 def load_data(filename):
     data = pd.read_csv(filename, sep=",")
     data = data.drop_duplicates(subset=['Project Name'], keep = 'first')
+    data = data.rename(columns={'Project Name': 'Nombre del Proyecto', 'Project Link': 'Link del Proyecto', 'Project Scope': 'Ámbitos del Proyecto', 'Project Description': 'Descripción del Proyecto', 'Project Goal': 'Objetivo del Proyecto', 'Citizen Science Web Name': 'Nombre de la Plataforma de Ciencia Ciudadana', 'Citizen Science Web Link': 'Link de la Plataforma'})
     return data
 
 projectsCS = load_data(Path(__file__).parents[0]/"CS_Projects.csv")
@@ -26,7 +27,7 @@ def barcelona_proj(web):
     return str(web)
     
 
-projectsCS['Citizen Science Web Name'] = projectsCS.apply(lambda row: barcelona_proj(row['Citizen Science Web Name']), axis=1)
+projectsCS['Nombre de la Plataforma de Ciencia Ciudadana'] = projectsCS.apply(lambda row: barcelona_proj(row['Nombre de la Plataforma de Ciencia Ciudadana']), axis=1)
 
 
 def separate_scopes(row_scopes, scopes):
@@ -78,27 +79,28 @@ def show_characteristics_page():
     st.title("Sistema de Recomendación de Proyectos de Ciencia Ciudadana Basados en el Currículum de Primaria de Cataluña")
 
     st.write("""### Este es el dataset de proyectos de Ciencia Ciudadana""")
+    st.write("""##### :globe_with_meridians: Los proyectos pertenecen a las plataformas "Observatorio de la Ciencia Ciudadana en España" y "Oficina de la Ciència Ciutadana". """)
     st.write("""##### Filtrar por:""")
     filteredCS = projectsCS.copy()
-    platform = st.multiselect(':globe_with_meridians: Plataforma', ['Observatorio de la Ciencia Ciudadana en España', 'Oficina de la Ciència Ciutadana'],['Observatorio de la Ciencia Ciudadana en España', 'Oficina de la Ciència Ciutadana'])
+    # platform = st.multiselect(':globe_with_meridians: Plataforma', ['Observatorio de la Ciencia Ciudadana en España', 'Oficina de la Ciència Ciutadana'],['Observatorio de la Ciencia Ciudadana en España', 'Oficina de la Ciència Ciutadana'], disabled = True)
     
-    if len(platform) != 0:
-        if len(platform) == 1:
-            filteredCS = projectsCS[projectsCS['Citizen Science Web Name'] == platform[0]]
-        else:
-            filteredCS = pd.concat([projectsCS[projectsCS['Citizen Science Web Name'] == platform[0]], projectsCS[projectsCS['Citizen Science Web Name'] == platform[1]]])
-    else:
-        st.write('Debes escoger al menos una opción.')
+    # if len(platform) != 0:
+    #     if len(platform) == 1:
+    #         filteredCS = projectsCS[projectsCS['Nombre de la Plataforma de Ciencia Ciudadana'] == platform[0]]
+    #     else:
+    #         filteredCS = pd.concat([projectsCS[projectsCS['Nombre de la Plataforma de Ciencia Ciudadana'] == platform[0]], projectsCS[projectsCS['Citizen Science Web Name'] == platform[1]]])
+    # else:
+    #     st.write('Debes escoger al menos una opción.')
 
     # To check all unique project scopes
     scopes = []
-    filteredCS.apply(lambda row: separate_scopes(row['Project Scope'], scopes), axis=1)
+    filteredCS.apply(lambda row: separate_scopes(row['Ámbitos del Proyecto'], scopes), axis=1)
     scopes.remove('nan')
     
     scope = st.multiselect(':books: Ámbitos', scopes, scopes)
 
     scopesdf = []
-    filteredCS['Scope2'] = filteredCS['Project Scope']
+    filteredCS['Scope2'] = filteredCS['Ámbitos del Proyecto']
     for sco in scope:
         filteredCS['Scope2'] = filteredCS.apply(lambda row: scope_in_project(row['Scope2'], sco), axis=1)
         scopesdf.append(filteredCS[filteredCS['Scope2'] == sco])
@@ -126,7 +128,7 @@ def show_characteristics_page():
     listKC = [KC1, KC2, KC3, KC4, KC5, KC6, KC7, KC8, KC9, KC10, KC11]
     shortKC = ['medio ambiente', 'consumo de productos locales', 'vida saludable', 'desigualtad, exclusión y empatía', 'igualdad de género', 'conflictos en la sociedad', 'cultura digital', 'creatividad', 'lenguas y culturas', 'colectivo', 'seguir aprendiendo']
 
-    if len(platform) != 0 and len(scope) != 0:
+    if len(scope) != 0:
         pred = st.selectbox("### En qué quieres basarte para encontrar proyectos similares?", ("Competencias Clave", "Otras"))
         if pred == "Otras":
             KC = st.text_input("Introduce las palabras clave para buscar proyectos similares (por ejemplo: 'animales salvajes'):")
@@ -137,6 +139,7 @@ def show_characteristics_page():
 
         if KC != '':
             projectsCS_clean = filteredCS.copy()
+            filteredCS = filteredCS.drop('Project Full Description', axis=1)
 
             # STEP 1: Preprocess the data
             projectsCS_clean['Project Full Description'].apply(build_terms)
@@ -156,6 +159,7 @@ def show_characteristics_page():
 
             st.write("##### Proyectos recomendados:")
             st.dataframe(filteredCS.iloc[top_indices])
+
 
             wc = create_wordcloud(projectsCS_clean, top_indices)
             wordcloud = WordCloud(max_words=150, background_color="white").generate(', '.join(wc))

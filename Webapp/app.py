@@ -1,6 +1,7 @@
 import streamlit as st
 from recommender_system import show_characteristics_page
 from key_competences import show_key_competences
+from about_project import show_about_project
 import base64
 from pathlib import Path
 from PIL import Image
@@ -10,7 +11,7 @@ import os
 image = Image.open(Path(__file__).parents[0]/'UPF.png')
 st.write("WEBAPP by CINTA ARNAU ARASA")
 st.sidebar.image(image, caption=None, width=None, use_column_width=None, clamp=False, channels='RGB', output_format='auto')
-page = st.sidebar.selectbox("Escoge una sección a visitar:", ("Proyectos de Ciencia Ciudadana", "Competencias Clave"))
+page = st.sidebar.selectbox("Escoge una sección a visitar:", ("Proyectos de Ciencia Ciudadana", "Competencias Clave", "Sobre el proyecto"))
 show_background = st.sidebar.checkbox('Mostrar fondo de pantalla', value = True)
 def get_base64(bin_file):
     with open(bin_file, 'rb') as f:
@@ -36,5 +37,7 @@ if show_background:
 
 if page == "Proyectos de Ciencia Ciudadana":
     show_characteristics_page()
-else:
+elif page == "Competencias Clave":
     show_key_competences()
+else:
+    show_about_project()
