@@ -101,6 +101,8 @@ def show_characteristics_page():
     st.write(""" :globe_with_meridians: Los proyectos pertenecen a las plataformas "Observatorio de la Ciencia Ciudadana en España" y "Oficina de la Ciència Ciutadana". """)
     st.write(""" Filtrar por:""")
     filteredCS = projectsCS.copy()
+    projectsCS_clean = filteredCS.copy()
+    filteredCS = filteredCS.drop('Project Full Description', axis=1)
     
     scopes = ['Ciencias de la Vida y Biomedicina', 'Ciencias Físicas', 'Ciencias Sociales', 'Tecnología']
     scope = st.multiselect("""###### :books: **Ámbitos**""", scopes, scopes)
@@ -155,9 +157,6 @@ def show_characteristics_page():
             KC = shortKC[selectedKC]
 
         if KC != '':
-            projectsCS_clean = filteredCS.copy()
-            filteredCS = filteredCS.drop('Project Full Description', axis=1)
-
             # STEP 1: Preprocess the data
             projectsCS_clean['Project Full Description'].apply(build_terms)
             KC = build_terms(KC)
