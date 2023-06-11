@@ -25,17 +25,28 @@ def barcelona_proj(web):
     if str(web) == 'Ciencia Ciudadana Ayuntamiento de Barcelona':
         return 'Oficina de la Ciència Ciutadana'
     return str(web)
+
+
+life_science = ['Medicina y Salud', 'Biodiversidad', 'salud', 'ambiental', 'Ecología y Medioambiente', 'Ciencias de la Agricultura y Veterinaria', 'Naturaleza y Aire Libre', 'Ciencia de los Alimentos', 'Animales', 'Pájaros', 'Marino y Terrestre', 'Biogeografía', 'Insectos y Polinizadores', 'Biología', 'Seguimiento de Especies a largo plazo']
+physics_science = ['Océanos', 'Agua', 'Física', 'Espacio y Astronomía', 'Clima y Meteorología', 'Gestión de Recursos Naturales', 'Geología y Ciencias de la Tierra', 'Ciencias Químicas', 'Geografía']
+social_science = ['Cultura y Arqueología', 'Ciencias Sociales', 'Educación', 'social', 'Ciencias Políticas', 'Culturas Indígenas']
+tech = ['Informática y Ciencias de la Computación', 'Transporte', 'Sonido']
+def scope_categories(proj_scope, categories = []):
+    proj_scopes = str(proj_scope).replace('.', '').split(', ')
+    for sco in proj_scopes:
+        if sco in life_science:
+            categories.append('Ciencias de la Vida y Biomedicina')
+        elif sco in physics_science:
+            categories.append('Ciencias Físicas')
+        elif sco in social_science:
+            categories.append('Ciencias Sociales')
+        else:
+            categories.append('Tecnología')
+        return list(set(categories))
     
 
 projectsCS['Nombre de la Plataforma de Ciencia Ciudadana'] = projectsCS.apply(lambda row: barcelona_proj(row['Nombre de la Plataforma de Ciencia Ciudadana']), axis=1)
-
-
-def separate_scopes(row_scopes, scopes):
-        row_scopes = str(row_scopes).replace('.', '')
-        proj_scopes = row_scopes.split(', ')
-        for i in proj_scopes:
-            if i not in scopes:
-                scopes.append(i)
+projectsCS['Ámbitos del Proyecto'] = projectsCS.apply(lambda row: scope_categories(row['Ámbitos del Proyecto']), axis=1)
 
 
 def scope_in_project(proj_sco, scope):
@@ -65,7 +76,9 @@ def select_max_rec(df):
         return 2
     elif len(df)<=30:
         return 3
-    return 5
+    elif len(df)<=40:
+        return 5
+    return 7
 
 
 def create_wordcloud(df, idxs):
@@ -75,29 +88,29 @@ def create_wordcloud(df, idxs):
     return top_idx_desc
 
 
+def search_project(name, search):
+    if str(search).lower() in str(name).lower:
+        return 'YES'
+    return ''
+
+
 def show_characteristics_page():
     st.title("Sistema de Recomendación de Proyectos de Ciencia Ciudadana Basados en el Currículum de Primaria de Cataluña")
 
     st.write("""### Este es el dataset de proyectos de Ciencia Ciudadana""")
-    st.write("""##### :globe_with_meridians: Los proyectos pertenecen a las plataformas "Observatorio de la Ciencia Ciudadana en España" y "Oficina de la Ciència Ciutadana". """)
-    st.write("""##### Filtrar por:""")
+    st.write(""" :globe_with_meridians: Los proyectos pertenecen a las plataformas "Observatorio de la Ciencia Ciudadana en España" y "Oficina de la Ciència Ciutadana". """)
+    st.write(""" Filtrar por:""")
     filteredCS = projectsCS.copy()
-    # platform = st.multiselect(':globe_with_meridians: Plataforma', ['Observatorio de la Ciencia Ciudadana en España', 'Oficina de la Ciència Ciutadana'],['Observatorio de la Ciencia Ciudadana en España', 'Oficina de la Ciència Ciutadana'], disabled = True)
     
-    # if len(platform) != 0:
-    #     if len(platform) == 1:
-    #         filteredCS = projectsCS[projectsCS['Nombre de la Plataforma de Ciencia Ciudadana'] == platform[0]]
-    #     else:
-    #         filteredCS = pd.concat([projectsCS[projectsCS['Nombre de la Plataforma de Ciencia Ciudadana'] == platform[0]], projectsCS[projectsCS['Citizen Science Web Name'] == platform[1]]])
-    # else:
-    #     st.write('Debes escoger al menos una opción.')
+    scopes = ['Ciencias de la Vida y Biomedicina', 'Ciencias Físicas', 'Ciencias Sociales', 'Tecnología']
+    scope = st.multiselect("""###### :books: **Ámbitos**""", scopes, scopes)
+    # st.write('Los ámbitos mencionados incluyen las siguientes categorías relacionadas con la ciencia:')
+    st.write(':seedling: **Ciencias de la Vida y Biomedicina**: Medicina y Salud, Biodiversidad, salud, ambiental, Ecología y Medioambiente, Ciencias de la Agricultura y Veterinaria, Naturaleza y Aire Libre, Ciencia de los Alimentos, Animales, Pájaros, Marino y Terrestre, Biogeografía, Insectos y Polinizadores, Biología, y Seguimiento de Especies a largo plazo.')
+    st.write(':test_tube: **Ciencias Físicas**: Océanos, Agua, Física, Espacio y Astronomía, Clima y Meteorología, Gestión de Recursos Naturales, Geología y Ciencias de la Tierra, Ciencias Químicas, y Geografía.')
+    st.write(':woman-woman-boy: **Ciencias Sociales**: Cultura y Arqueología, Ciencias Sociales, Educación, social, Ciencias Políticas, y Culturas Indígenas.')
+    st.write(':computer: **Tecnología**: Informática y Ciencias de la Computación, Transporte, y Sonido.')
 
-    # To check all unique project scopes
-    scopes = []
-    filteredCS.apply(lambda row: separate_scopes(row['Ámbitos del Proyecto'], scopes), axis=1)
-    scopes.remove('nan')
-    
-    scope = st.multiselect(':books: Ámbitos', scopes, scopes)
+    # search = st.text_input(":mag_right: Encuentra un proyecto por el nombre:")
 
     scopesdf = []
     filteredCS['Scope2'] = filteredCS['Ámbitos del Proyecto']
@@ -109,6 +122,10 @@ def show_characteristics_page():
     if len(scopesdf) != 0:
         filteredCS = pd.concat(scopesdf)
         filteredCS = filteredCS.drop(['Scope2'], axis=1)
+        # if search:
+        #     filteredCS['CHECK'] = filteredCS.apply(lambda row: search_project(row['Nombre del Proyecto'], search), axis=1)
+        #     filteredCS = filteredCS[filteredCS['CHECK'] == 'YES']
+        #     filteredCS = filteredCS.drop('CHECK', axis=1)
         st.dataframe(filteredCS.sort_index())
     else:
         st.write('Debes escoger al menos una opción.')
@@ -158,7 +175,8 @@ def show_characteristics_page():
             top_indices = similarities.argsort()[0][-num_recommendations:][::-1]  # Sort and get the top indices
 
             st.write("##### Proyectos recomendados:")
-            st.dataframe(filteredCS.iloc[top_indices])
+            df = filteredCS.iloc[top_indices]
+            st.dataframe(df)
 
 
             wc = create_wordcloud(projectsCS_clean, top_indices)
