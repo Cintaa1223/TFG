@@ -88,10 +88,10 @@ def create_wordcloud(df, idxs):
     return top_idx_desc
 
 
-def search_project(name, search):
-    if str(search).lower() in str(name).lower:
-        return 'YES'
-    return ''
+# def search_project(name, search):
+#     if str(search).lower() in str(name).lower:
+#         return 'YES'
+#     return ''
 
 
 def show_characteristics_page():
@@ -101,8 +101,6 @@ def show_characteristics_page():
     st.write(""" :globe_with_meridians: Los proyectos pertenecen a las plataformas "Observatorio de la Ciencia Ciudadana en España" y "Oficina de la Ciència Ciutadana". """)
     st.write(""" Filtrar por:""")
     filteredCS = projectsCS.copy()
-    projectsCS_clean = filteredCS.copy()
-    filteredCS = filteredCS.drop('Project Full Description', axis=1)
     
     scopes = ['Ciencias de la Vida y Biomedicina', 'Ciencias Físicas', 'Ciencias Sociales', 'Tecnología']
     scope = st.multiselect("""###### :books: **Ámbitos**""", scopes, scopes)
@@ -128,7 +126,8 @@ def show_characteristics_page():
         #     filteredCS['CHECK'] = filteredCS.apply(lambda row: search_project(row['Nombre del Proyecto'], search), axis=1)
         #     filteredCS = filteredCS[filteredCS['CHECK'] == 'YES']
         #     filteredCS = filteredCS.drop('CHECK', axis=1)
-        st.dataframe(filteredCS.sort_index())
+        show_df = filteredCS.drop('Project Full Description', axis=1)
+        st.dataframe(show_df.sort_index())
     else:
         st.write('Debes escoger al menos una opción.')
 
@@ -145,7 +144,7 @@ def show_characteristics_page():
     KC10 = "Sentirse parte de un proyecto colectivo, tanto a nivel local como global, desarrollando empatía y generosidad."
     KC11 = "Desarrollar las habilidades que le permitan seguir aprendiendo a lo largo de la vida, desde la confianza en el conocimiento como motor de desarrollo y la valoración crítica de los riesgos y beneficios de este conocimiento."
     listKC = [KC1, KC2, KC3, KC4, KC5, KC6, KC7, KC8, KC9, KC10, KC11]
-    shortKC = ['medio ambiente', 'consumo de productos locales', 'vida saludable', 'desigualtad, exclusión y empatía', 'igualdad de género', 'conflictos en la sociedad', 'cultura digital', 'creatividad', 'lenguas y culturas', 'colectivo', 'seguir aprendiendo']
+    shortKC = ['concienciación del medio ambiente', 'consumo de productos locales', 'vida saludable', 'inclusión social', 'género', 'perspectiva social', 'tecnología', 'creatividad', 'cooperación', 'colaborar', 'educación']
 
     if len(scope) != 0:
         pred = st.selectbox("### En qué quieres basarte para encontrar proyectos similares?", ("Competencias Clave", "Otras"))
@@ -158,6 +157,7 @@ def show_characteristics_page():
 
         if KC != '':
             # STEP 1: Preprocess the data
+            projectsCS_clean = filteredCS.copy()
             projectsCS_clean['Project Full Description'].apply(build_terms)
             KC = build_terms(KC)
 
@@ -174,7 +174,7 @@ def show_characteristics_page():
             top_indices = similarities.argsort()[0][-num_recommendations:][::-1]  # Sort and get the top indices
 
             st.write("##### Proyectos recomendados:")
-            df = filteredCS.iloc[top_indices]
+            df = show_df.iloc[top_indices]
             st.dataframe(df)
 
 
